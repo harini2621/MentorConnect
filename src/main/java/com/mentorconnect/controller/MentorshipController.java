@@ -16,6 +16,7 @@ public class MentorshipController {
 
     public MentorshipController(
             MentorshipService mentorshipService) {
+
         this.mentorshipService = mentorshipService;
     }
 
@@ -41,13 +42,24 @@ public class MentorshipController {
 
     @GetMapping
     public List<MentorshipPair> getAllMentorships() {
-        return mentorshipService.getAllMentorships();
+
+        return mentorshipService
+                .getAllMentorships();
     }
 
     @GetMapping("/{id}")
     public MentorshipPair getMentorshipById(
             @PathVariable Long id) {
 
-        return mentorshipService.getMentorshipById(id);
+        return mentorshipService
+                .getMentorshipById(id);
+    }
+
+    @GetMapping("/student/{studentId}/active")
+    public MentorshipPair getActiveMentorshipByStudentId(
+            @PathVariable Long studentId) {
+
+        return mentorshipService
+                .getActiveMentorshipByStudentId(studentId);
     }
 }

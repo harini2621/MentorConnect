@@ -5,3 +5,7 @@ target/
 .vscode/
 *.class
 *.log
+
+mentorconnect-frontend/node_modules/
+mentorconnect-frontend/dist/
+mentorconnect-frontend/.env

@@ -50,7 +50,10 @@ public class MentorshipService {
 
         List<Alumni> availableAlumni = alumniRepository.findAll()
                 .stream()
+
+                // Check mentor capacity
                 .filter(alumni -> {
+
                     long activeMentees =
                             mentorshipPairRepository
                                     .countByAlumniIdAndStatus(
@@ -61,8 +64,18 @@ public class MentorshipService {
                     return activeMentees
                             < alumni.getMaxConcurrentMentees();
                 })
+
+                // Only mentors with at least one matching tag
+                .filter(alumni ->
+                        calculateMatchingTags(
+                                alumni,
+                                studentTagIds
+                        ) > 0
+                )
+
                 .collect(Collectors.toList());
 
+        // Highest matching tags first
         availableAlumni.sort(
                 Comparator.comparing(
                         (Alumni alumni) ->
@@ -103,6 +116,7 @@ public class MentorshipService {
                                 "Alumni not found with id: " + alumniId
                         ));
 
+        // Student can have only one active mentorship
         boolean alreadyMentored =
                 mentorshipPairRepository
                         .existsByStudentIdAndStatus(
@@ -116,6 +130,7 @@ public class MentorshipService {
             );
         }
 
+        // Check mentor capacity
         long activeMentees =
                 mentorshipPairRepository
                         .countByAlumniIdAndStatus(
@@ -140,14 +155,33 @@ public class MentorshipService {
     }
 
     public List<MentorshipPair> getAllMentorships() {
+
         return mentorshipPairRepository.findAll();
     }
 
     public MentorshipPair getMentorshipById(Long id) {
+
         return mentorshipPairRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Mentorship pair not found with id: " + id
                         ));
+    }
+
+    public MentorshipPair getActiveMentorshipByStudentId(Long studentId) {
+
+        return mentorshipPairRepository
+                .findByStudentId(studentId)
+                .stream()
+                .filter(pair ->
+                        pair.getStatus() == MentorshipStatus.ACTIVE
+                )
+                .findFirst()
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Active mentorship not found for student id: "
+                                        + studentId
+                        )
+                );
     }
 }
